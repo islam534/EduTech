@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered learning platform with courses, community, mentorship, and eco-friendly products featuring interactive 3D visualizations.">
+  <title>AI-Powered Eco Learning Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/controls/OrbitControls.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      scroll-behavior: smooth;
+      background: linear-gradient(135deg, #1e3a8a, #4c1d95, #7e22ce);
+      color: #fff;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background 0.3s, color 0.3s, transform 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      background: #60a5fa;
+      color: #1e3a8a;
+      transform: translateY(-2px);
+    }
+    .hamburger {
+      display: none;
+      font-size: 2.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .hamburger:hover { color: #60a5fa; }
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 2rem;
+      transition: transform 0.4s, box-shadow 0.4s;
+      transform: perspective(1200px) rotateY(0deg);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    .card:hover {
+      transform: perspective(1200px) rotateY(5deg) translateY(-12px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+    .section {
+      min-height: 100vh;
+      padding: 5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .three-canvas {
+      height: 300px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+    }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .form-message { transition: opacity 0.3s; }
+    .btn-primary {
+      padding: 0.75rem 2rem;
+      background: #3b82f6;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+    .btn-green {
+      background: #10b981;
+    }
+    .btn-green:hover {
+      background: #059669;
+    }
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: #111827;
+        padding: 1.5rem;
+      }
+      .nav-links.active { display: flex; }
+      .hamburger { display: block; }
+      .three-canvas { height: 200px; }
+      .section { padding: 3rem 1rem; }
+    }
+    @keyframes slide-in {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .animate-slide-in { animation: slide-in 0.7s ease-out; }
+    .animate-fade-in { animation: fade-in 0.9s ease-out; }
+    .animate-pulse { animation: pulse 2.5s infinite; }
+    .gradient-bg {
+      background: linear-gradient(270deg, #3b82f6, #8b5cf6, #ec4899);
+      background-size: 600% 600%;
+      animation: gradient-shift 15s ease infinite;
+    }
+    .neumorphic {
+      background: #e0e7ff;
+      box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="sticky-header">
+    <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
+      <div class="logo text-3xl font-bold tracking-tight" aria-label="Brand logo">AI EcoLearn</div>
+      <ul class="nav-links flex gap-4 flex-wrap" role="navigation">
+        <li><a href="#home" class="active">Home</a></li>
+        <li><a href="#courses">Courses</a></li>
+        <li><a href="#global-programs">Global Programs</a></li>
+        <li><a href="#community">Community</a></li>
+        <li><a href="#sessions">Sessions</a></li>
+        <li><a href="#internships">Internships</a></li>
+        <li><a href="#competitions">Competitions</a></li>
+        <li><a href="#content">Content</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#ai-avatar">AI Avatar</a></li>
+        <li><a href="#image-to-3d">Image to 3D</a></li>
+        <li><a href="#newsletter">Newsletter</a></li>
+      </ul>
+      <div class="hamburger" aria-label="Toggle menu" tabindex="0">☰</div>
+    </nav>
+  </header>
+  <main>
+    <!-- Home Section -->
+    <section id="home" class="section gradient-bg text-center">
+      <h1 class="text-6xl font-bold animate-slide-in">Welcome to AI EcoLearn</h1>
+      <p class="text-2xl mt-6 max-w-3xl mx-auto animate-fade-in">Empower your future with AI-driven education, global connections, and sustainable products. Explore our interactive 3D experiences.</p>
+      <a href="#courses" class="mt-8 inline-block btn-primary animate-pulse">Start Learning</a>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Our Courses</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Choose from a variety of cutting-edge courses designed for the modern learner.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 max-w-7xl mx-auto">
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Web Development</h3>
+          <p class="mt-3">Master HTML, CSS, and JavaScript to build responsive websites.</p>
+          <button onclick="enrollCourse('Web Development')" class="mt-4 btn-primary">Enroll Now</button>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Sustainable Design</h3>
+          <p class="mt-3">Learn eco-friendly design principles for a greener future.</p>
+          <button onclick="enrollCourse('Sustainable Design')" class="mt-4 btn-primary">Enroll Now</button>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">AI & Machine Learning</h3>
+          <p class="mt-3">Dive into AI with hands-on projects in neural networks.</p>
+          <button onclick="enrollCourse('AI & Machine Learning')" class="mt-4 btn-primary">Enroll Now</button>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Global Leadership</h3>
+          <p class="mt-3">Develop skills to lead in a connected, global world.</p>
+          <button onclick="enrollCourse('Global Leadership')" class="mt-4 btn-primary">Enroll Now</button>
+        </div>
+      </div>
+      <p id="course-message" class="text-center mt-6 text-lg form-message"></p>
+    </section>
+
+    <!-- Global Programs Section -->
+    <section id="global-programs" class="section gradient-bg">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Global Programs & University Connections</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Partner with top universities and join global learning initiatives.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 max-w-4xl mx-auto">
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Study Abroad Programs</h3>
+          <p class="mt-3">Collaborate with international universities for immersive learning.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Learn More</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Research Partnerships</h3>
+          <p class="mt-3">Work with leading academics on cutting-edge projects.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Join Now</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Community & Networking</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Connect with learners and professionals worldwide.</p>
+      <div class="max-w-3xl mx-auto mt-12">
+        <div class="flex flex-col gap-4 neumorphic p-6 rounded-lg">
+          <input id="post-input" type="text" placeholder="Share your thoughts..." class="form-input">
+          <button onclick="addPost()" class="btn-primary">Post</button>
+        </div>
+        <div id="community-feed" class="mt-8"></div>
+      </div>
+    </section>
+
+    <!-- One-to-One Sessions Section -->
+    <section id="sessions" class="section gradient-bg">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">One-to-One Sessions</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Book personalized sessions with our expert mentors.</p>
+      <div class="max-w-md mx-auto mt-12 card text-gray-900 neumorphic">
+        <label for="session-date" class="block text-lg font-semibold">Select a Date</label>
+        <input id="session-date" type="date" class="form-input mt-2">
+        <label for="session-type" class="block text-lg font-semibold mt-4">Session Type</label>
+        <select id="session-type" class="form-input mt-2">
+          <option value="career">Career Coaching</option>
+          <option value="technical">Technical Guidance</option>
+          <option value="design">Design Feedback</option>
+        </select>
+        <button onclick="bookSession()" class="mt-6 btn-primary">Book Now</button>
+        <p id="session-message" class="mt-4 text-center form-message"></p>
+      </div>
+    </section>
+
+    <!-- Internships Section -->
+    <section id="internships" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Internships & Mentorship</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Gain real-world experience with our industry partners.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12 max-w-7xl mx-auto">
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Tech Internship</h3>
+          <p class="mt-3">Work with leading tech companies on innovative projects.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Apply</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Design Internship</h3>
+          <p class="mt-3">Create impactful designs with top agencies.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Apply</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Mentorship Program</h3>
+          <p class="mt-3">Get personalized guidance from industry leaders.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Join</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Competitions Section -->
+    <section id="competitions" class="section gradient-bg">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Competition Preparation</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Train with experts to excel in global competitions.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 max-w-4xl mx-auto">
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Coding Challenge</h3>
+          <p class="mt-3">Prepare for hackathons and coding competitions.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Join</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Design Contest</h3>
+          <p class="mt-3">Showcase your creativity in global design challenges.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Join</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Educational Content Section -->
+    <section id="content" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Interactive Educational Content</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Engage with dynamic learning resources tailored to you.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 max-w-7xl mx-auto">
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Video Tutorials</h3>
+          <p class="mt-3">High-quality video lessons for all skill levels.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Watch</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Interactive Quizzes</h3>
+          <p class="mt-3">Test your knowledge with engaging quizzes.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Try Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Live Workshops</h3>
+          <p class="mt-3">Hands-on sessions with industry experts.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Join</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">AI-Powered Labs</h3>
+          <p class="mt-3">Experiment with AI-driven simulations.</p>
+          <a href="#contact" class="mt-4 inline-block btn-primary">Explore</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Eco-friendly Products Section -->
+    <section id="products" class="section gradient-bg">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Eco-friendly Products</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Shop sustainable products designed with the planet in mind.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 max-w-7xl mx-auto">
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Recycled Notebook</h3>
+          <div id="3d-notebook" class="three-canvas"></div>
+          <p class="mt-3">Made from 100% recycled paper - $19.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Reusable Bottle</h3>
+          <div id="3d-bottle" class="three-canvas"></div>
+          <p class="mt-3">Stainless steel, BPA-free - $29.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Bamboo Pen</h3>
+          <div id="3d-pen" class="three-canvas"></div>
+          <p class="mt-3">Biodegradable bamboo - $9.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Recycled Bag</h3>
+          <div id="3d-bag" class="three-canvas"></div>
+          <p class="mt-3">Durable, made from recycled plastics - $39.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Eco Tote</h3>
+          <div id="3d-tote" class="three-canvas"></div>
+          <p class="mt-3">Organic cotton tote bag - $24.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Solar Charger</h3>
+          <div id="3d-charger" class="three-canvas"></div>
+          <p class="mt-3">Portable solar-powered charger - $49.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Wooden Sunglasses</h3>
+          <div id="3d-sunglasses" class="three-canvas"></div>
+          <p class="mt-3">Sustainable bamboo sunglasses - $59.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Eco Straw Set</h3>
+          <div id="3d-straw" class="three-canvas"></div>
+          <p class="mt-3">Reusable stainless steel straws - $14.99</p>
+          <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
+        </div>
+      </div>
+      <!-- Interactive 3D Tutorial -->
+      <div class="mt-16 max-w-3xl mx-auto card text-gray-900 neumorphic">
+        <h3 class="text-2xl font-semibold text-center">Interactive 3D Tutorial</h3>
+        <p class="mt-3 text-center">Learn to interact with 3D models: drag to rotate, scroll to zoom, click to change color.</p>
+        <div id="3d-tutorial" class="three-canvas mt-4"></div>
+        <div class="flex gap-4 mt-4 justify-center">
+          <button onclick="changeTutorialColor()" class="btn-primary">Change Color</button>
+          <button onclick="resetTutorialView()" class="btn-primary">Reset View</button>
+          <input id="rotation-speed" type="range" min="0" max="0.05" step="0.001" value="0.01" class="w-32">
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Avatar Generator Section -->
+    <section id="ai-avatar" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">AI Avatar Generator</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Create a unique 3D avatar by describing your character (e.g., "futuristic cyborg, neon blue hair").</p>
+      <div class="max-w-3xl mx-auto mt-12 card text-gray-900 neumorphic">
+        <input id="avatar-prompt" type="text" placeholder="Describe your avatar..." class="form-input">
+        <button onclick="generateAvatar()" class="mt-4 btn-primary">Generate Avatar</button>
+        <div id="avatar-container" class="three-canvas mt-4"></div>
+        <p id="avatar-message" class="mt-4 text-center form-message"></p>
+        <img id="avatar-placeholder" src="https://via.placeholder.com/400x300?text=AI+Avatar" alt="AI-generated avatar" class="mt-4 rounded-lg hidden max-w-full">
+      </div>
+    </section>
+
+    <!-- Image to 3D Section -->
+    <section id="image-to-3d" class="section gradient-bg">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Image to 3D Model</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Upload an image to convert it to a 3D model (simulated).</p>
+      <div class="max-w-3xl mx-auto mt-12 card text-gray-900 neumorphic">
+        <input id="image-upload" type="file" accept="image/*" class="form-input">
+        <select id="3d-geometry" class="form-input mt-4">
+          <option value="box">Box</option>
+          <option value="sphere">Sphere</option>
+          <option value="cylinder">Cylinder</option>
+          <option value="cone">Cone</option>
+        </select>
+        <button onclick="convertImageTo3D()" class="mt-4 btn-primary">Convert to 3D</button>
+        <div id="3d-image-container" class="three-canvas mt-4"></div>
+        <p id="image-3d-message" class="mt-4 text-center form-message"></p>
+        <img id="image-placeholder" src="https://via.placeholder.com/400x300?text=Uploaded+Image" alt="Uploaded image" class="mt-4 rounded-lg hidden max-w-full">
+      </div>
+    </section>
+
+    <!-- Newsletter Signup Section -->
+    <section id="newsletter" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Stay Updated</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Subscribe to our newsletter for the latest updates and offers.</p>
+      <div class="max-w-md mx-auto mt-12 card text-gray-900 neumorphic">
+        <input id="newsletter-email" type="email" placeholder="Your Email" class="form-input">
+        <button onclick="subscribeNewsletter()" class="mt-4 btn-primary">Subscribe</button>
+        <p id="newsletter-message" class="mt-4 text-center form-message"></p>
+      </div>
+    </section>
+  </main>
+  <footer class="py-8 bg-gray-800 text-center">
+    <p class="text-lg">© 2025 AI EcoLearn. All rights reserved.</p>
+    <p class="mt-2 text-sm">Inspired by cutting-edge design and AI innovation.</p>
+  </footer>
+  <script>
+    // Navigation
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+    });
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        navLinks.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+    hamburger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navLinks.classList.toggle('active');
+        hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+      }
+    });
+
+    // Course Enrollment
+    function enrollCourse(course) {
+      const message = document.getElementById('course-message');
+      message.textContent = `Successfully enrolled in ${course}!`;
+      message.style.color = '#10b981';
+      setTimeout(() => message.textContent = '', 3000);
+    }
+
+    // Community Feed
+    let posts = [
+      { text: 'Welcome to AI EcoLearn!', comments: ['Excited to join!', 'Great platform!'] },
+      { text: 'Just enrolled in the AI course!', comments: ['Awesome choice!', 'How’s it going?'] },
+      { text: 'Loving the eco-friendly products!', comments: ['The notebook is amazing!'] }
+    ];
+    function renderPosts() {
+      const feed = document.getElementById('community-feed');
+      feed.innerHTML = posts.map((post, idx) => `
+        <div class="card text-gray-900 neumorphic mb-6">
+          <p class="text-lg">${post.text}</p>
+          <p class="text-sm text-gray-600 mt-2">${post.comments.join(', ')}</p>
+          <input id="comment-${idx}" type="text" placeholder="Add a comment..." class="form-input mt-3">
+          <button onclick="addComment(${idx})" class="mt-2 btn-primary">Comment</button>
+        </div>
+      `).join('');
+    }
+    function addPost() {
+      const input = document.getElementById('post-input');
+      if (input.value) {
+        posts.push({ text: input.value, comments: [] });
+        input.value = '';
+        renderPosts();
+      }
+    }
+    function addComment(idx) {
+      const input = document.getElementById(`comment-${idx}`);
+      if (input.value) {
+        posts[idx].comments.push(input.value);
+        input.value = '';
+        renderPosts();
+      }
+    }
+    renderPosts();
+
+    // Session Booking
+    function bookSession() {
+      const date = document.getElementById('session-date').value;
+      const type = document.getElementById('session-type').value;
+      const message = document.getElementById('session-message');
+      if (!date) {
+        message.textContent = 'Please select a date.';
+        message.style.color = '#ef4444';
+        return;
+      }
+      message.textContent = `Session booked for ${date} (${type})!`;
+      message.style.color = '#10b981';
+      setTimeout(() => message.textContent = '', 3000);
+    }
+
+    // Newsletter Signup
+    function subscribeNewsletter() {
+      const email = document.getElementById('newsletter-email').value;
+      const message = document.getElementById('newsletter-message');
+      if (!email || !email.includes('@')) {
+        message.textContent = 'Please enter a valid email.';
+        message.style.color = '#ef4444';
+        return;
+      }
+      message.textContent = 'Subscribed successfully!';
+      message.style.color = '#10b981';
+      document.getElementById('newsletter-email').value = '';
+      setTimeout(() => message.textContent = '', 3000);
+    }
+
+    // 3D Visualization Setup
+    function create3DScene(containerId, geometryType, color, controlsEnabled = true) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 300, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      const width = window.innerWidth * 0.8 > 400 ? 400 : window.innerWidth * 0.8;
+      renderer.setSize(width, 300);
+      document.getElementById(containerId).appendChild(renderer.domElement);
+
+      let geometry;
+      switch (geometryType) {
+        case 'torusKnot': geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16); break;
+        case 'sphere': geometry = new THREE.SphereGeometry(1, 32, 32); break;
+        case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32); break;
+        case 'box': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
+        case 'cone': geometry = new THREE.ConeGeometry(1, 2, 32); break;
+        case 'dodecahedron': geometry = new THREE.DodecahedronGeometry(1); break;
+        case 'octahedron': geometry = new THREE.OctahedronGeometry(1); break;
+        case 'tetrahedron': geometry = new THREE.TetrahedronGeometry(1); break;
+        case 'avatar': geometry = new THREE.SphereGeometry(1, 32, 32); break;
+        case 'image3d': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
+      }
+      const material = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+      const light1 = new THREE.PointLight(0xffffff, 1, 100);
+      light1.position.set(5, 5, 5);
+      scene.add(light1);
+      const light2 = new THREE.AmbientLight(0x404040);
+      scene.add(light2);
+      camera.position.z = 5;
+
+      let controls;
+      if (controlsEnabled) {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true;
+        controls.minDistance = 2;
+        controls.maxDistance = 10;
+      }
+
+      let rotationSpeed = 0.01;
+      function animate() {
+        requestAnimationFrame(animate);
+        if (!controlsEnabled) {
+          mesh.rotation.x += rotationSpeed;
+          mesh.rotation.y += rotationSpeed;
+        }
+        controls?.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        const width = window.innerWidth * 0.8 > 400 ? 400 : window.innerWidth * 0.8;
+        renderer.setSize(width, 300);
+        camera.aspect = width / 300;
+        camera.updateProjectionMatrix();
+      });
+
+      return { mesh, camera, material, setRotationSpeed: (speed) => rotationSpeed = speed };
+    }
+
+    // Initialize 3D Models
+    const scenes = {
+      notebook: create3DScene('3d-notebook', 'torusKnot', 0x10b981),
+      bottle: create3DScene('3d-bottle', 'cylinder', 0x3b82f6),
+      pen: create3DScene('3d-pen', 'sphere', 0x8b5cf6),
+      bag: create3DScene('3d-bag', 'box', 0x10b981),
+      tote: create3DScene('3d-tote', 'cone', 0x3b82f6),
+      charger: create3DScene('3d-charger', 'dodecahedron', 0x8b5cf6),
+      sunglasses: create3DScene('3d-sunglasses', 'octahedron', 0x10b981),
+      straw: create3DScene('3d-straw', 'tetrahedron', 0x3b82f6),
+      tutorial: create3DScene('3d-tutorial', 'torusKnot', 0x60a5fa)
+    };
+
+    // 3D Tutorial Controls
+    function changeTutorialColor() {
+      const colors = [0x60a5fa, 0x10b981, 0x8b5cf6, 0xf43f5e];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      scenes.tutorial.material.color.set(randomColor);
+    }
+    function resetTutorialView() {
+      scenes.tutorial.mesh.rotation.set(0, 0, 0);
+      scenes.tutorial.camera.position.set(0, 0, 5);
+      scenes.tutorial.material.color.set(0x60a5fa);
+    }
+    document.getElementById('rotation-speed').addEventListener('input', (e) => {
+      scenes.tutorial.setRotationSpeed(parseFloat(e.target.value));
+    });
+
+    // AI Avatar Generator
+    function generateAvatar() {
+      const prompt = document.getElementById('avatar-prompt').value;
+      const message = document.getElementById('avatar-message');
+      const container = document.getElementById('avatar-container');
+      const placeholder = document.getElementById('avatar-placeholder');
+      container.innerHTML = '';
+      if (!prompt) {
+        message.textContent = 'Please enter a description.';
+        message.style.color = '#ef4444';
+        return;
+      }
+      message.textContent = `Generated avatar: ${prompt}`;
+      message.style.color = '#10b981';
+      placeholder.src = `https://via.placeholder.com/400x300?text=${encodeURIComponent(prompt)}`;
+      placeholder.classList.remove('hidden');
+      create3DScene('avatar-container', 'avatar', 0x8b5cf6);
+      setTimeout(() => {
+        message.textContent = '';
+        placeholder.classList.add('hidden');
+      }, 5000);
+    }
+
+    // Image to 3D Model
+    function convertImageTo3D() {
+      const input = document.getElementById('image-upload');
+      const geometry = document.getElementById('3d-geometry').value;
+      const message = document.getElementById('image-3d-message');
+      const container = document.getElementById('3d-image-container');
+      const placeholder = document.getElementById('image-placeholder');
+      container.innerHTML = '';
+      if (!input.files || !input.files[0]) {
+        message.textContent = 'Please upload an image.';
+        message.style.color = '#ef4444';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        placeholder.src = e.target.result;
+        placeholder.classList.remove('hidden');
+        message.textContent = `Converted image to 3D ${geometry}!`;
+        message.style.color = '#10b981';
+        create3DScene('3d-image-container', geometry, 0x3b82f6);
+        setTimeout(() => {
+          message.textContent = '';
+          placeholder.classList.add('hidden');
+        }, 5000);
+      };
+      reader.readAsDataURL(input.files[0]);
+      input.value = '';
+    }
+  </script>
+</body>
+</html>
