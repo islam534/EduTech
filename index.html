@@ -42,9 +42,10 @@
     }
     .hamburger {
       display: none;
-      font-size: 2.5rem;
+      font-size: 2rem;
       cursor: pointer;
       transition: color 0.3s;
+      color: #fff;
     }
     .hamburger:hover { color: #60a5fa; }
     .card {
@@ -112,7 +113,7 @@
     }
     @media (max-width: 768px) {
       .nav-links {
-        display: none;
+        display: none; /* Hide nav-links by default on small screens */
         flex-direction: column;
         position: absolute;
         top: 70px;
@@ -120,16 +121,28 @@
         right: 0;
         background: #111827;
         padding: 1.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       }
-      .nav-links.active { display: flex; }
-      .hamburger { display: block; }
-      .three-canvas { height: 200px; }
-      .section { padding: 3rem 1rem; }
+      .nav-links.active {
+        display: flex; /* Show nav-links when active */
+      }
+      .nav-links a {
+        padding: 1rem;
+        margin: 0.5rem 0;
+        text-align: center;
+      }
+      .hamburger {
+        display: block; /* Show hamburger on small screens */
+      }
+      .three-canvas {
+        height: 200px;
+      }
+      .section {
+        padding: 3rem 1rem;
+      }
     }
     @keyframes slide-in {
-      from { transform: translateY(40px); opacity露
-
-      opacity: 0; }
+      from { transform: translateY(40px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
     @keyframes fade-in {
@@ -167,9 +180,10 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0linic, 0.5);
+      background: rgba(0, 0, 0, 0.5);
       justify-content: center;
       align-items: center;
+      z-index: 2000;
     }
     .modal-content {
       background: #fff;
@@ -199,7 +213,7 @@
         <li><a href="#image-to-3d" role="menuitem">Image to 3D</a></li>
         <li><a href="#newsletter" role="menuitem">Newsletter</a></li>
       </ul>
-      <div class="hamburger" aria-label="Toggle menu" tabindex="0" role="button">☰</div>
+      <div class="hamburger" aria-label="Toggle navigation menu" tabindex="0" role="button">☰</div>
     </nav>
   </header>
 
@@ -496,10 +510,27 @@
     // Navigation
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
+    
+    // Initialize hamburger menu state
+    function initializeNav() {
+      if (window.innerWidth <= 768) {
+        navLinks.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+      } else {
+        navLinks.classList.remove('active'); // Ensure nav-links are visible on larger screens
+      }
+    }
+
+    // Run on page load
+    window.addEventListener('load', initializeNav);
+    // Run on window resize
+    window.addEventListener('resize', initializeNav);
+
     hamburger.addEventListener('click', () => {
       navLinks.classList.toggle('active');
       hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
     });
+
     navLinks.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
@@ -508,6 +539,7 @@
         hamburger.setAttribute('aria-expanded', 'false');
       });
     });
+
     hamburger.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
