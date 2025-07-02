@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="AI-powered learning platform with courses, community, mentorship, and eco-friendly products featuring interactive 3D visualizations.">
-  <title>AI-Powered Eco Learning Platform</title>
+  <title>Eco Wise</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/controls/OrbitControls.min.js"></script>
@@ -60,6 +60,14 @@
     }
     .sticky-header.scrolled {
       background: rgba(103, 174, 110, 0.95);
+    }
+    .logo {
+      height: 40px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+    .logo:hover {
+      transform: scale(1.1);
     }
     .nav-links {
       display: flex;
@@ -262,6 +270,9 @@
       .sticky-header {
         padding: 0.75rem 1rem;
       }
+      .logo {
+        height: 30px;
+      }
       .nav-links {
         display: none;
         flex-direction: column;
@@ -310,6 +321,9 @@
     @media (max-width: 480px) {
       .sticky-header {
         padding: 0.5rem 0.75rem;
+      }
+      .logo {
+        height: 25px;
       }
       .nav-links {
         top: 50px;
@@ -423,7 +437,7 @@
 <body>
   <header class="sticky-header">
     <nav class="max-w-7xl mx-auto flex justify-between items-center px-4" role="navigation">
-      <div class="logo text-3xl font-bold tracking-tight" aria-label="Brand logo">AI EcoLearn</div>
+      <img src="https://github.com/islam534/EduTech/blob/b18bab7c52221f3a0a3fb84ffe1f61f8fc459ef8/ChatGPT%20Image%20Jul%202%2C%202025%2C%2012_56_20%20PM.png" alt="AI EcoLearn Logo" class="logo" aria-label="AI EcoLearn Logo">
       <ul class="nav-links flex gap-4 flex-wrap" role="menu">
         <li><a href="#home" class="active" role="menuitem">Home</a></li>
         <li><a href="#courses" role="menuitem">Courses</a></li>
@@ -786,6 +800,9 @@
   </footer>
 
   <script>
+    // Initialize scenes object to avoid undefined errors
+    const scenes = {};
+
     // Navigation
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
@@ -794,22 +811,6 @@
     const scrollProgress = document.querySelector('.scroll-progress');
     const backToTop = document.querySelector('.back-to-top');
     let lastScrollY = window.scrollY;
-
-    // Initialize navigation state
-    function initializeNav() {
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile) {
-        navLinks.classList.remove('active');
-        hamburger.classList.remove('active');
-        hamburger.setAttribute('aria-expanded', 'false');
-      } else {
-        navLinks.classList.remove('active');
-        hamburger.classList.remove('active');
-        header.classList.remove('hidden');
-      }
-      updateScrollProgress();
-      applyDarkMode();
-    }
 
     // Debounce function for performance
     function debounce(func, wait) {
@@ -876,32 +877,32 @@
       if (!localStorage.getItem('darkMode')) localStorage.setItem('darkMode', isDark);
     }
 
-    // Event listeners
-    window.addEventListener('load', () => {
-      initializeNav();
+    // Initialize navigation state
+    function initializeNav() {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        navLinks.classList.remove('active');
+        hamburger.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+      } else {
+        navLinks.classList.remove('active');
+        hamburger.classList.remove('active');
+        header.classList.remove('hidden');
+      }
+      updateScrollProgress();
       applyDarkMode();
-    });
+    }
+
+    // Event listeners
+    window.addEventListener('load', initializeNav);
+    const debouncedHandleScroll = debounce(handleScroll, 10);
+    window.addEventListener('scroll', debouncedHandleScroll);
     window.addEventListener('resize', initializeNav);
-    window.addEventListener('scroll', debounce(handleScroll, 10));
     hamburger.addEventListener('click', () => {
       navLinks.classList.toggle('active');
       hamburger.classList.toggle('active');
       hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
       header.classList.remove('hidden');
-    });
-    themeToggle.addEventListener('click', toggleDarkMode);
-    backToTop.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-        navLinks.classList.remove('active');
-        hamburger.classList.remove('active');
-        hamburger.setAttribute('aria-expanded', 'false');
-        header.classList.remove('hidden');
-      });
     });
     hamburger.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -911,6 +912,28 @@
         hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
         header.classList.remove('hidden');
       }
+    });
+    themeToggle.addEventListener('click', toggleDarkMode);
+    themeToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleDarkMode();
+      }
+    });
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        if (window.innerWidth <= 768) {
+          navLinks.classList.remove('active');
+          hamburger.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+        }
+        header.classList.remove('hidden');
+      });
     });
 
     // Course Enrollment
@@ -1014,124 +1037,130 @@
 
     // 3D Visualization Setup
     function create3DScene(containerId, geometryType, color, isSolarSystem = false, isCameraDemo = false) {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 300, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ alpha: true });
-      const width = Math.min(window.innerWidth * 0.85, 400);
-      renderer.setSize(width, 300);
-      const container = document.getElementById(containerId);
-      container.innerHTML = '<div class="loading"></div>';
-      container.appendChild(renderer.domElement);
-
-      let geometry, mesh, orbitPaths = [];
-      if (isSolarSystem) {
-        const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
-        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-        scene.add(sun);
-        const planets = [
-          { name: 'Mercury', radius: 0.2, distance: 2, color: 0x808080, speed: 0.02 },
-          { name: 'Venus', radius: 0.3, distance: 3, color: 0xffa500, speed: 0.015 },
-          { name: 'Earth', radius: 0.4, distance: 4, color: 0x0000ff, speed: 0.01 },
-          { name: 'Mars', radius: 0.3, distance: 5, color: 0xff0000, speed: 0.008 }
-        ];
-        planets.forEach(p => {
-          const planetGeometry = new THREE.SphereGeometry(p.radius, 32, 32);
-          const planetMaterial = new THREE.MeshBasicMaterial({ color: p.color });
-          const planet = new THREE.Mesh(planetGeometry, planetMaterial);
-          planet.userData = { angle: 0, distance: p.distance, speed: p.speed, name: p.name };
-          scene.add(planet);
-          const orbitGeometry = new THREE.RingGeometry(p.distance - 0.1, p.distance + 0.1, 64);
-          const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0x404040, side: THREE.DoubleSide });
-          const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
-          orbit.rotation.x = Math.PI / 2;
-          scene.add(orbit);
-          orbitPaths.push(orbit);
-        });
-        mesh = { sun, planets, orbitPaths };
-      } else if (isCameraDemo) {
-        geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        const material = new THREE.MeshStandardMaterial({ color: 0x32ce6e });
-        mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-        camera.position.set(0, 0, 5);
-      } else {
-        switch (geometryType) {
-          case 'torusKnot': geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16); break;
-          case 'sphere': geometry = new THREE.SphereGeometry(1, 32, 32); break;
-          case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32); break;
-          case 'box': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
-          case 'cone': geometry = new THREE.ConeGeometry(1, 2, 32); break;
-          case 'dodecahedron': geometry = new THREE.DodecahedronGeometry(1); break;
-          case 'octahedron': geometry = new THREE.OctahedronGeometry(1); break;
-          case 'tetrahedron': geometry = new THREE.TetrahedronGeometry(1); break;
-        }
-        const material = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 });
-        mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-      }
-      const light1 = new THREE.PointLight(0xffffff, 1, 100);
-      light1.position.set(5, 5, 5);
-      scene.add(light1);
-      const light2 = new THREE.AmbientLight(0x404040);
-      scene.add(light2);
-      camera.position.z = isSolarSystem ? 10 : isCameraDemo ? 5 : 5;
-
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.enableZoom = true;
-      controls.minDistance = 2;
-      controls.maxDistance = isSolarSystem ? 15 : 10;
-
-      let helper = null;
-      function animate() {
-        requestAnimationFrame(animate);
-        if (isSolarSystem && mesh.planets) {
-          const speed = parseFloat(document.getElementById('solar-speed')?.value || 0.01);
-          mesh.planets.forEach(p => {
-            p.userData.angle += p.userData.speed * speed;
-            const planet = scene.children.find(m => m.userData && m.userData.angle === p.userData.angle);
-            if (planet) {
-              planet.position.x = Math.cos(p.userData.angle) * p.userData.distance;
-              planet.position.z = Math.sin(p.userData.angle) * p.userData.distance;
-            }
-          });
-        } else if (mesh.rotation) {
-          const speed = parseFloat(document.getElementById('rotation-speed')?.value || 0.01);
-          mesh.rotation.x += speed;
-          mesh.rotation.y += speed;
-        } else if (isCameraDemo) {
-          const angle = parseFloat(document.getElementById('camera-angle')?.value || 45) * (Math.PI / 180);
-          camera.position.set(Math.sin(angle) * 5, 2, Math.cos(angle) * 5);
-          camera.lookAt(mesh.position);
-        }
-        controls.update();
-        if (helper) helper.update();
-        renderer.render(scene, camera);
-      }
-      setTimeout(() => {
-        container.querySelector('.loading').remove();
-        animate();
-      }, 1000);
-
-      window.addEventListener('resize', () => {
+      try {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 300, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
         const width = Math.min(window.innerWidth * 0.85, 400);
         renderer.setSize(width, 300);
-        camera.aspect = width / 300;
-        camera.updateProjectionMatrix();
-      });
+        const container = document.getElementById(containerId);
+        container.innerHTML = '<div class="loading"></div>';
+        container.appendChild(renderer.domElement);
 
-      container.addEventListener('mousemove', (e) => {
-        const rect = container.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width * 2 - 1;
-        const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
-        camera.position.x += x * 0.1;
-        camera.position.y += y * 0.1;
-        camera.lookAt(scene.position);
-      });
+        let geometry, mesh, orbitPaths = [];
+        if (isSolarSystem) {
+          const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
+          const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+          const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+          scene.add(sun);
+          const planets = [
+            { name: 'Mercury', radius: 0.2, distance: 2, color: 0x808080, speed: 0.02 },
+            { name: 'Venus', radius: 0.3, distance: 3, color: 0xffa500, speed: 0.015 },
+            { name: 'Earth', radius: 0.4, distance: 4, color: 0x0000ff, speed: 0.01 },
+            { name: 'Mars', radius: 0.3, distance: 5, color: 0xff0000, speed: 0.008 }
+          ];
+          planets.forEach(p => {
+            const planetGeometry = new THREE.SphereGeometry(p.radius, 32, 32);
+            const planetMaterial = new THREE.MeshBasicMaterial({ color: p.color });
+            const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+            planet.userData = { angle: 0, distance: p.distance, speed: p.speed, name: p.name };
+            scene.add(planet);
+            const orbitGeometry = new THREE.RingGeometry(p.distance - 0.1, p.distance + 0.1, 64);
+            const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0x404040, side: THREE.DoubleSide });
+            const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+            orbit.rotation.x = Math.PI / 2;
+            scene.add(orbit);
+            orbitPaths.push(orbit);
+          });
+          mesh = { sun, planets, orbitPaths };
+        } else if (isCameraDemo) {
+          geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+          const material = new THREE.MeshStandardMaterial({ color: 0x32ce6e });
+          mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+          camera.position.set(0, 0, 5);
+        } else {
+          switch (geometryType) {
+            case 'torusKnot': geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16); break;
+            case 'sphere': geometry = new THREE.SphereGeometry(1, 32, 32); break;
+            case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32); break;
+            case 'box': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
+            case 'cone': geometry = new THREE.ConeGeometry(1, 2, 32); break;
+            case 'dodecahedron': geometry = new THREE.DodecahedronGeometry(1); break;
+            case 'octahedron': geometry = new THREE.OctahedronGeometry(1); break;
+            case 'tetrahedron': geometry = new THREE.TetrahedronGeometry(1); break;
+          }
+          const material = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 });
+          mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+        }
+        const light1 = new THREE.PointLight(0xffffff, 1, 100);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+        const light2 = new THREE.AmbientLight(0x404040);
+        scene.add(light2);
+        camera.position.z = isSolarSystem ? 10 : isCameraDemo ? 5 : 5;
 
-      return { scene, camera, mesh, renderer, helper };
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true;
+        controls.minDistance = 2;
+        controls.maxDistance = isSolarSystem ? 15 : 10;
+
+        let helper = null;
+        function animate() {
+          requestAnimationFrame(animate);
+          if (isSolarSystem && mesh.planets) {
+            const speed = parseFloat(document.getElementById('solar-speed')?.value || 0.01);
+            mesh.planets.forEach(p => {
+              p.userData.angle += p.userData.speed * speed;
+              const planet = scene.children.find(m => m.userData && m.userData.angle === p.userData.angle);
+              if (planet) {
+                planet.position.x = Math.cos(p.userData.angle) * p.userData.distance;
+                planet.position.z = Math.sin(p.userData.angle) * p.userData.distance;
+              }
+            });
+          } else if (mesh.rotation) {
+            const speed = parseFloat(document.getElementById('rotation-speed')?.value || 0.01);
+            mesh.rotation.x += speed;
+            mesh.rotation.y += speed;
+          } else if (isCameraDemo) {
+            const angle = parseFloat(document.getElementById('camera-angle')?.value || 45) * (Math.PI / 180);
+            camera.position.set(Math.sin(angle) * 5, 2, Math.cos(angle) * 5);
+            camera.lookAt(mesh.position);
+          }
+          controls.update();
+          if (helper) helper.update();
+          renderer.render(scene, camera);
+        }
+        setTimeout(() => {
+          container.querySelector('.loading').remove();
+          animate();
+        }, 1000);
+
+        window.addEventListener('resize', () => {
+          const width = Math.min(window.innerWidth * 0.85, 400);
+          renderer.setSize(width, 300);
+          camera.aspect = width / 300;
+          camera.updateProjectionMatrix();
+        });
+
+        container.addEventListener('mousemove', (e) => {
+          const rect = container.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width * 2 - 1;
+          const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
+          camera.position.x += x * 0.1;
+          camera.position.y += y * 0.1;
+          camera.lookAt(scene.position);
+        });
+
+        return { scene, camera, mesh, renderer, helper };
+      } catch (error) {
+        container.innerHTML = `<p class="text-center text-red-500">Error loading 3D scene: ${error.message}. Try refreshing.</p>`;
+        console.error(`3D Error in ${containerId}:`, error);
+        return null;
+      }
     }
 
     // Lazy Load 3D Models with Intersection Observer
@@ -1160,11 +1189,9 @@
     }, observerOptions);
     document.querySelectorAll('.section').forEach(section => observer.observe(section));
 
-    const scenes = {};
-
     // 3D Tutorial Controls
     function changeTutorialColor() {
-      if (scenes.tutorial) {
+      if (scenes.tutorial && scenes.tutorial.mesh) {
         const colorPicker = document.getElementById('color-picker');
         scenes.tutorial.mesh.material.color.set(colorPicker.value);
       }
