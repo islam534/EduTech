@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/controls/OrbitControls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/helpers/VertexNormalsHelper.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -150,10 +151,22 @@
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
       width: 100%;
       max-width: 100%;
+      position: relative;
+      overflow: hidden;
     }
     .card:hover, .card:active {
       transform: perspective(1200px) rotateY(5deg) translateY(-12px);
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shimmer 5s infinite;
     }
     .section {
       min-height: 100vh;
@@ -166,6 +179,8 @@
       max-width: 100vw;
       position: relative;
       overflow: hidden;
+      background-size: cover;
+      background-position: center;
     }
     .section::before {
       content: '';
@@ -186,6 +201,25 @@
       margin: 0 auto;
       border-radius: 10px;
       overflow: hidden;
+      position: relative;
+    }
+    .three-canvas::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: -2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .three-canvas:hover::after {
+      opacity: 1;
     }
     .form-input, .form-textarea {
       width: 100%;
@@ -321,14 +355,14 @@
       50% { transform: scale(1.08); }
       100% { transform: scale(1); }
     }
-    @keyframes gradient-shift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    @keyframes shimmer {
+      0% { left: -100%; }
+      20% { left: 100%; }
+      100% { left: 100%; }
     }
-    @keyframes menu-slide {
-      from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    @keyframes orbit {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .animate-slide-in { animation: slide-in 0.7s ease-out; }
     .animate-fade-in { animation: fade-in 0.9s ease-out; }
@@ -339,6 +373,9 @@
       background-size: 600% 600%;
       animation: gradient-shift 15s ease infinite;
     }
+    .section#home { background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%23328e6e" fill-opacity="0.3" d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,85.3C672,75,768,85,864,90.7C960,96,1056,96,1152,85.3C1248,75,1344,53,1392,42.7L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E'); }
+    .section#courses { background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%2367ae6e" fill-opacity="0.3" d="M0,128L48,117.3C96,107,192,85,288,85.3C384,85,480,107,576,117.3C672,128,768,128,864,117.3C960,107,1056,85,1152,74.7C1248,64,1344,64,1392,64L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E'); }
+    .section#global-programs { background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%2390c67c" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,117.3C384,107,480,117,576,128C672,139,768,149,864,149.3C960,149,1056,139,1152,128C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E'); }
     .neumorphic {
       background: var(--accent);
       box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
@@ -365,6 +402,22 @@
       width: 100%;
       color: var(--text-dark);
     }
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--primary-mid);
+      border-top: 4px solid var(--primary-dark);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -383,6 +436,7 @@
         <li><a href="#products" role="menuitem">Products</a></li>
         <li><a href="#ai-avatar" role="menuitem">AI Avatar</a></li>
         <li><a href="#image-to-3d" role="menuitem">Image to 3D</a></li>
+        <li><a href="#camera-tutorial" role="menuitem">Camera Tutorial</a></li>
         <li><a href="#newsletter" role="menuitem">Newsletter</a></li>
       </ul>
       <div class="flex items-center gap-4">
@@ -426,6 +480,15 @@
           <h3 class="text-2xl font-semibold">Global Leadership</h3>
           <p class="mt-3">Develop skills to lead in a connected, global world.</p>
           <button onclick="enrollCourse('Global Leadership')" class="mt-4 btn-primary">Enroll Now</button>
+        </div>
+        <div class="card text-gray-900 neumorphic">
+          <h3 class="text-2xl font-semibold">Civicly</h3>
+          <p class="mt-3">Democracy isn’t taught. We make it lived. Engage with gamified civic education, debates, and real-world actions.</p>
+          <p class="mt-2 text-sm italic">Elevator Pitch: A platform turning Gen Z into active citizens with interactive challenges and local issue-based learning.</p>
+          <p class="mt-2 text-sm">Revenue: B2B toolkits, B2C in-app purchases, CSR partnerships.</p>
+          <p class="mt-2 text-sm">Prototype: Landing page, quiz, lesson, mockups, pitch deck.</p>
+          <p class="mt-2 text-sm">Why It Wins: Tackles civic education gap, scalable, youth-centered.</p>
+          <button onclick="enrollCourse('Civicly')" class="mt-4 btn-primary">Enroll Now</button>
         </div>
       </div>
       <p id="course-message" class="text-center mt-6 text-lg form-message"></p>
@@ -566,6 +629,30 @@
           <a href="#contact" class="mt-4 inline-block btn-primary">Explore</a>
         </div>
       </div>
+      <!-- Solar System Explorer -->
+      <div class="mt-16 max-w-3xl mx-auto card text-gray-900 neumorphic">
+        <h3 class="text-2xl font-semibold text-center">Solar System Explorer</h3>
+        <p class="mt-3 text-center">Explore a 3D solar system model inspired by NASA data (Screenshot 2025-07-02 121956.png). Drag to rotate, scroll to zoom.</p>
+        <div id="solar-system" class="three-canvas mt-4" data-tooltip="Click planets to highlight orbits"></div>
+        <div class="flex gap-4 mt-4 justify-center">
+          <button onclick="togglePlanetLabels()" class="btn-primary">Toggle Labels</button>
+          <button onclick="resetSolarView()" class="btn-primary">Reset View</button>
+          <input id="solar-speed" type="range" min="0.001" max="0.05" step="0.001" value="0.01" class="w-32">
+        </div>
+      </div>
+      <!-- Interactive 3D Tutorial -->
+      <div class="mt-16 max-w-3xl mx-auto card text-gray-900 neumorphic">
+        <h3 class="text-2xl font-semibold text-center">Interactive 3D Tutorial</h3>
+        <p class="mt-3 text-center">Learn 3D visualization with helpers (Screenshot 2025-07-02 122121.png). Drag to rotate, scroll to zoom.</p>
+        <div id="3d-tutorial" class="three-canvas mt-4" data-tooltip="Toggle helpers for advanced views"></div>
+        <div class="flex gap-4 mt-4 justify-center">
+          <button onclick="changeTutorialColor()" class="btn-primary">Change Color</button>
+          <button onclick="toggleNormalsHelper()" class="btn-primary">Toggle Normals</button>
+          <button onclick="resetTutorialView()" class="btn-primary">Reset View</button>
+          <input id="rotation-speed" type="range" min="0" max="0.05" step="0.001" value="0.01" class="w-32">
+          <input id="color-picker" type="color" value="#32ce6e" class="w-10 h-10">
+        </div>
+      </div>
     </section>
 
     <!-- Eco-friendly Products Section -->
@@ -625,10 +712,11 @@
       <!-- Interactive 3D Tutorial -->
       <div class="mt-16 max-w-3xl mx-auto card text-gray-900 neumorphic">
         <h3 class="text-2xl font-semibold text-center">Interactive 3D Tutorial</h3>
-        <p class="mt-3 text-center">Learn to interact with 3D models: drag to rotate, scroll to zoom, click to change color.</p>
+        <p class="mt-3 text-center">Learn to interact with 3D models: drag to rotate, scroll to zoom, click to change color. Use helpers for advanced visualization.</p>
         <div id="3d-tutorial" class="three-canvas mt-4"></div>
         <div class="flex gap-4 mt-4 justify-center">
           <button onclick="changeTutorialColor()" class="btn-primary">Change Color</button>
+          <button onclick="toggleNormalsHelper()" class="btn-primary">Toggle Normals</button>
           <button onclick="resetTutorialView()" class="btn-primary">Reset View</button>
           <input id="rotation-speed" type="range" min="0" max="0.05" step="0.001" value="0.01" class="w-32">
           <input id="color-picker" type="color" value="#32ce6e" class="w-10 h-10">
@@ -666,8 +754,22 @@
       </div>
     </section>
 
+    <!-- Camera Tutorial Section -->
+    <section id="camera-tutorial" class="section bg-gray-900">
+      <h2 class="text-5xl font-bold text-center animate-slide-in">Camera Tutorial</h2>
+      <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Master camera controls inspired by Three.js Camera (Screenshot 2025-07-02 121815.png). Adjust perspectives and animations.</p>
+      <div class="max-w-3xl mx-auto mt-12 card text-gray-900 neumorphic">
+        <div id="camera-demo" class="three-canvas mt-4" data-tooltip="Adjust camera angles"></div>
+        <div class="flex gap-4 mt-4 justify-center">
+          <button onclick="switchCameraView()" class="btn-primary">Switch View</button>
+          <button onclick="resetCameraView()" class="btn-primary">Reset View</button>
+          <input id="camera-angle" type="range" min="0" max="90" step="1" value="45" class="w-32">
+        </div>
+      </div>
+    </section>
+
     <!-- Newsletter Signup Section -->
-    <section id="newsletter" class="section bg-gray-900">
+    <section id="newsletter" class="section gradient-bg">
       <h2 class="text-5xl font-bold text-center animate-slide-in">Stay Updated</h2>
       <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Subscribe to our newsletter for the latest updates and offers.</p>
       <div class="max-w-md mx-auto mt-12 card text-gray-900 neumorphic">
@@ -706,6 +808,7 @@
         header.classList.remove('hidden');
       }
       updateScrollProgress();
+      applyDarkMode();
     }
 
     // Debounce function for performance
@@ -754,15 +857,29 @@
 
     // Toggle dark mode
     function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-      themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
-      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+      const isDark = !document.body.classList.contains('dark-mode');
+      document.body.classList.toggle('dark-mode', isDark);
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('darkMode', isDark);
+      applyDarkMode();
+    }
+
+    // Apply dark mode to all elements
+    function applyDarkMode() {
+      const isDark = localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.body.classList.toggle('dark-mode', isDark);
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      document.querySelectorAll('.card, .neumorphic, .modal-content').forEach(el => {
+        el.style.background = isDark ? '#2e4a47' : 'var(--accent)';
+        el.style.color = isDark ? 'var(--text-light)' : 'var(--text-dark)';
+      });
+      if (!localStorage.getItem('darkMode')) localStorage.setItem('darkMode', isDark);
     }
 
     // Event listeners
     window.addEventListener('load', () => {
       initializeNav();
-      if (localStorage.getItem('darkMode') === 'true') toggleDarkMode();
+      applyDarkMode();
     });
     window.addEventListener('resize', initializeNav);
     window.addEventListener('scroll', debounce(handleScroll, 10));
@@ -896,48 +1013,107 @@
     }
 
     // 3D Visualization Setup
-    function create3DScene(containerId, geometryType, color) {
+    function create3DScene(containerId, geometryType, color, isSolarSystem = false, isCameraDemo = false) {
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 300, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer({ alpha: true });
       const width = Math.min(window.innerWidth * 0.85, 400);
       renderer.setSize(width, 300);
-      document.getElementById(containerId).appendChild(renderer.domElement);
+      const container = document.getElementById(containerId);
+      container.innerHTML = '<div class="loading"></div>';
+      container.appendChild(renderer.domElement);
 
-      let geometry;
-      switch (geometryType) {
-        case 'torusKnot': geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16); break;
-        case 'sphere': geometry = new THREE.SphereGeometry(1, 32, 32); break;
-        case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32); break;
-        case 'box': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
-        case 'cone': geometry = new THREE.ConeGeometry(1, 2, 32); break;
-        case 'dodecahedron': geometry = new THREE.DodecahedronGeometry(1); break;
-        case 'octahedron': geometry = new THREE.OctahedronGeometry(1); break;
-        case 'tetrahedron': geometry = new THREE.TetrahedronGeometry(1); break;
+      let geometry, mesh, orbitPaths = [];
+      if (isSolarSystem) {
+        const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+        const planets = [
+          { name: 'Mercury', radius: 0.2, distance: 2, color: 0x808080, speed: 0.02 },
+          { name: 'Venus', radius: 0.3, distance: 3, color: 0xffa500, speed: 0.015 },
+          { name: 'Earth', radius: 0.4, distance: 4, color: 0x0000ff, speed: 0.01 },
+          { name: 'Mars', radius: 0.3, distance: 5, color: 0xff0000, speed: 0.008 }
+        ];
+        planets.forEach(p => {
+          const planetGeometry = new THREE.SphereGeometry(p.radius, 32, 32);
+          const planetMaterial = new THREE.MeshBasicMaterial({ color: p.color });
+          const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+          planet.userData = { angle: 0, distance: p.distance, speed: p.speed, name: p.name };
+          scene.add(planet);
+          const orbitGeometry = new THREE.RingGeometry(p.distance - 0.1, p.distance + 0.1, 64);
+          const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0x404040, side: THREE.DoubleSide });
+          const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+          orbit.rotation.x = Math.PI / 2;
+          scene.add(orbit);
+          orbitPaths.push(orbit);
+        });
+        mesh = { sun, planets, orbitPaths };
+      } else if (isCameraDemo) {
+        geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const material = new THREE.MeshStandardMaterial({ color: 0x32ce6e });
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+        camera.position.set(0, 0, 5);
+      } else {
+        switch (geometryType) {
+          case 'torusKnot': geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16); break;
+          case 'sphere': geometry = new THREE.SphereGeometry(1, 32, 32); break;
+          case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32); break;
+          case 'box': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
+          case 'cone': geometry = new THREE.ConeGeometry(1, 2, 32); break;
+          case 'dodecahedron': geometry = new THREE.DodecahedronGeometry(1); break;
+          case 'octahedron': geometry = new THREE.OctahedronGeometry(1); break;
+          case 'tetrahedron': geometry = new THREE.TetrahedronGeometry(1); break;
+        }
+        const material = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 });
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
       }
-      const material = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 });
-      const mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
       const light1 = new THREE.PointLight(0xffffff, 1, 100);
       light1.position.set(5, 5, 5);
       scene.add(light1);
       const light2 = new THREE.AmbientLight(0x404040);
       scene.add(light2);
-      camera.position.z = 5;
+      camera.position.z = isSolarSystem ? 10 : isCameraDemo ? 5 : 5;
 
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.enableZoom = true;
       controls.minDistance = 2;
-      controls.maxDistance = 10;
+      controls.maxDistance = isSolarSystem ? 15 : 10;
 
+      let helper = null;
       function animate() {
         requestAnimationFrame(animate);
+        if (isSolarSystem && mesh.planets) {
+          const speed = parseFloat(document.getElementById('solar-speed')?.value || 0.01);
+          mesh.planets.forEach(p => {
+            p.userData.angle += p.userData.speed * speed;
+            const planet = scene.children.find(m => m.userData && m.userData.angle === p.userData.angle);
+            if (planet) {
+              planet.position.x = Math.cos(p.userData.angle) * p.userData.distance;
+              planet.position.z = Math.sin(p.userData.angle) * p.userData.distance;
+            }
+          });
+        } else if (mesh.rotation) {
+          const speed = parseFloat(document.getElementById('rotation-speed')?.value || 0.01);
+          mesh.rotation.x += speed;
+          mesh.rotation.y += speed;
+        } else if (isCameraDemo) {
+          const angle = parseFloat(document.getElementById('camera-angle')?.value || 45) * (Math.PI / 180);
+          camera.position.set(Math.sin(angle) * 5, 2, Math.cos(angle) * 5);
+          camera.lookAt(mesh.position);
+        }
         controls.update();
+        if (helper) helper.update();
         renderer.render(scene, camera);
       }
-      animate();
+      setTimeout(() => {
+        container.querySelector('.loading').remove();
+        animate();
+      }, 1000);
 
       window.addEventListener('resize', () => {
         const width = Math.min(window.innerWidth * 0.85, 400);
@@ -946,7 +1122,16 @@
         camera.updateProjectionMatrix();
       });
 
-      return { mesh, camera, material };
+      container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width * 2 - 1;
+        const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
+        camera.position.x += x * 0.1;
+        camera.position.y += y * 0.1;
+        camera.lookAt(scene.position);
+      });
+
+      return { scene, camera, mesh, renderer, helper };
     }
 
     // Lazy Load 3D Models with Intersection Observer
@@ -965,6 +1150,10 @@
             scenes.sunglasses = create3DScene('3d-sunglasses', 'octahedron', 0x32ce6e);
             scenes.straw = create3DScene('3d-straw', 'tetrahedron', 0x67ae6e);
             scenes.tutorial = create3DScene('3d-tutorial', 'torusKnot', 0x32ce6e);
+          } else if (id === 'content' && !scenes.solarSystem) {
+            scenes.solarSystem = create3DScene('solar-system', 'sphere', 0xffff00, true);
+          } else if (id === 'camera-tutorial' && !scenes.cameraDemo) {
+            scenes.cameraDemo = create3DScene('camera-demo', 'box', 0x32ce6e, false, true);
           }
         }
       });
@@ -977,23 +1166,67 @@
     function changeTutorialColor() {
       if (scenes.tutorial) {
         const colorPicker = document.getElementById('color-picker');
-        scenes.tutorial.material.color.set(colorPicker.value);
+        scenes.tutorial.mesh.material.color.set(colorPicker.value);
+      }
+    }
+    function toggleNormalsHelper() {
+      if (scenes.tutorial && scenes.tutorial.mesh) {
+        if (!scenes.tutorial.helper) {
+          const helper = new THREE.VertexNormalsHelper(scenes.tutorial.mesh, 0.5, 0xff0000);
+          scenes.tutorial.scene.add(helper);
+          scenes.tutorial.helper = helper;
+        } else {
+          scenes.tutorial.scene.remove(scenes.tutorial.helper);
+          scenes.tutorial.helper = null;
+        }
       }
     }
     function resetTutorialView() {
       if (scenes.tutorial) {
         scenes.tutorial.mesh.rotation.set(0, 0, 0);
         scenes.tutorial.camera.position.set(0, 0, 5);
-        scenes.tutorial.material.color.set(0x32ce6e);
+        scenes.tutorial.mesh.material.color.set(0x32ce6e);
+        if (scenes.tutorial.helper) {
+          scenes.tutorial.scene.remove(scenes.tutorial.helper);
+          scenes.tutorial.helper = null;
+        }
       }
     }
-    document.getElementById('rotation-speed')?.addEventListener('input', (e) => {
-      if (scenes.tutorial) {
-        const speed = parseFloat(e.target.value);
-        scenes.tutorial.mesh.rotation.x += speed;
-        scenes.tutorial.mesh.rotation.y += speed;
+
+    // Solar System Controls
+    function togglePlanetLabels() {
+      if (scenes.solarSystem) {
+        scenes.solarSystem.mesh.planets.forEach(p => {
+          const planet = scenes.solarSystem.scene.children.find(m => m.userData && m.userData.angle === p.userData.angle);
+          if (planet) planet.visible = !planet.visible;
+          const orbit = scenes.solarSystem.mesh.orbitPaths.find(o => o.geometry.parameters.innerRadius === p.distance - 0.1);
+          if (orbit) orbit.visible = !orbit.visible;
+        });
       }
-    });
+    }
+    function resetSolarView() {
+      if (scenes.solarSystem) {
+        scenes.solarSystem.camera.position.set(0, 0, 10);
+        scenes.solarSystem.mesh.planets.forEach(p => {
+          const planet = scenes.solarSystem.scene.children.find(m => m.userData && m.userData.angle === p.userData.angle);
+          if (planet) planet.position.set(0, 0, 0);
+        });
+      }
+    }
+
+    // Camera Demo Controls
+    function switchCameraView() {
+      if (scenes.cameraDemo) {
+        scenes.cameraDemo.camera.position.set(5, 5, 5);
+        scenes.cameraDemo.camera.lookAt(0, 0, 0);
+      }
+    }
+    function resetCameraView() {
+      if (scenes.cameraDemo) {
+        scenes.cameraDemo.camera.position.set(0, 0, 5);
+        scenes.cameraDemo.camera.lookAt(0, 0, 0);
+      }
+    }
 
     // AI Avatar Generator
     function generateAvatar() {
