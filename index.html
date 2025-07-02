@@ -97,6 +97,8 @@
       border-radius: 8px;
       font-weight: 600;
       transition: background 0.3s, transform 0.2s;
+      border: none;
+      cursor: pointer;
     }
     .btn-primary:hover {
       background: #2563eb;
@@ -125,7 +127,9 @@
       .section { padding: 3rem 1rem; }
     }
     @keyframes slide-in {
-      from { transform: translateY(40px); opacity: 0; }
+      from { transform: translateY(40px); opacity露
+
+      opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
     @keyframes fade-in {
@@ -155,29 +159,50 @@
       box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
       border-radius: 12px;
     }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0linic, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
   </style>
 </head>
 <body>
   <header class="sticky-header">
-    <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
+    <nav class="max-w-7xl mx-auto flex justify-between items-center px-4" role="navigation">
       <div class="logo text-3xl font-bold tracking-tight" aria-label="Brand logo">AI EcoLearn</div>
-      <ul class="nav-links flex gap-4 flex-wrap" role="navigation">
-        <li><a href="#home" class="active">Home</a></li>
-        <li><a href="#courses">Courses</a></li>
-        <li><a href="#global-programs">Global Programs</a></li>
-        <li><a href="#community">Community</a></li>
-        <li><a href="#sessions">Sessions</a></li>
-        <li><a href="#internships">Internships</a></li>
-        <li><a href="#competitions">Competitions</a></li>
-        <li><a href="#content">Content</a></li>
-        <li><a href="#products">Products</a></li>
-        <li><a href="#ai-avatar">AI Avatar</a></li>
-        <li><a href="#image-to-3d">Image to 3D</a></li>
-        <li><a href="#newsletter">Newsletter</a></li>
+      <ul class="nav-links flex gap-4 flex-wrap" role="menu">
+        <li><a href="#home" class="active" role="menuitem">Home</a></li>
+        <li><a href="#courses" role="menuitem">Courses</a></li>
+        <li><a href="#global-programs" role="menuitem">Global Programs</a></li>
+        <li><a href="#community" role="menuitem">Community</a></li>
+        <li><a href="#sessions" role="menuitem">Sessions</a></li>
+        <li><a href="#internships" role="menuitem">Internships</a></li>
+        <li><a href="#competitions" role="menuitem">Competitions</a></li>
+        <li><a href="#content" role="menuitem">Content</a></li>
+        <li><a href="#products" role="menuitem">Products</a></li>
+        <li><a href="#ai-avatar" role="menuitem">AI Avatar</a></li>
+        <li><a href="#image-to-3d" role="menuitem">Image to 3D</a></li>
+        <li><a href="#newsletter" role="menuitem">Newsletter</a></li>
       </ul>
-      <div class="hamburger" aria-label="Toggle menu" tabindex="0">☰</div>
+      <div class="hamburger" aria-label="Toggle menu" tabindex="0" role="button">☰</div>
     </nav>
   </header>
+
   <main>
     <!-- Home Section -->
     <section id="home" class="section gradient-bg text-center">
@@ -214,6 +239,18 @@
       </div>
       <p id="course-message" class="text-center mt-6 text-lg form-message"></p>
     </section>
+
+    <!-- Enrollment Modal -->
+    <div id="enrollment-modal" class="modal">
+      <div class="modal-content">
+        <h2 class="text-2xl font-bold">Confirm Enrollment</h2>
+        <p class="mt-4">Are you sure you want to enroll in <span id="course-name"></span>?</p>
+        <div class="flex gap-4 mt-6 justify-center">
+          <button onclick="confirmEnrollment()" class="btn-primary">Yes, Enroll</button>
+          <button onclick="closeModal()" class="btn-primary">Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Global Programs Section -->
     <section id="global-programs" class="section gradient-bg">
@@ -253,6 +290,13 @@
       <div class="max-w-md mx-auto mt-12 card text-gray-900 neumorphic">
         <label for="session-date" class="block text-lg font-semibold">Select a Date</label>
         <input id="session-date" type="date" class="form-input mt-2">
+        <label for="session-time" class="block text-lg font-semibold mt-4">Select Time</label>
+        <select id="session-time" class="form-input mt-2">
+          <option value="9am">9:00 AM</option>
+          <option value="11am">11:00 AM</option>
+          <option value="2pm">2:00 PM</option>
+          <option value="4pm">4:00 PM</option>
+        </select>
         <label for="session-type" class="block text-lg font-semibold mt-4">Session Type</label>
         <select id="session-type" class="form-input mt-2">
           <option value="career">Career Coaching</option>
@@ -338,49 +382,49 @@
       <h2 class="text-5xl font-bold text-center animate-slide-in">Eco-friendly Products</h2>
       <p class="text-xl mt-4 max-w-2xl mx-auto text-center animate-fade-in">Shop sustainable products designed with the planet in mind.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 max-w-7xl mx-auto">
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of a recycled notebook.">
           <h3 class="text-2xl font-semibold">Recycled Notebook</h3>
           <div id="3d-notebook" class="three-canvas"></div>
           <p class="mt-3">Made from 100% recycled paper - $19.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of a reusable bottle.">
           <h3 class="text-2xl font-semibold">Reusable Bottle</h3>
           <div id="3d-bottle" class="three-canvas"></div>
           <p class="mt-3">Stainless steel, BPA-free - $29.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of a bamboo pen.">
           <h3 class="text-2xl font-semibold">Bamboo Pen</h3>
           <div id="3d-pen" class="three-canvas"></div>
           <p class="mt-3">Biodegradable bamboo - $9.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of a recycled bag.">
           <h3 class="text-2xl font-semibold">Recycled Bag</h3>
           <div id="3d-bag" class="three-canvas"></div>
           <p class="mt-3">Durable, made from recycled plastics - $39.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of an eco tote.">
           <h3 class="text-2xl font-semibold">Eco Tote</h3>
           <div id="3d-tote" class="three-canvas"></div>
           <p class="mt-3">Organic cotton tote bag - $24.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of a solar charger.">
           <h3 class="text-2xl font-semibold">Solar Charger</h3>
           <div id="3d-charger" class="three-canvas"></div>
           <p class="mt-3">Portable solar-powered charger - $49.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of wooden sunglasses.">
           <h3 class="text-2xl font-semibold">Wooden Sunglasses</h3>
           <div id="3d-sunglasses" class="three-canvas"></div>
           <p class="mt-3">Sustainable bamboo sunglasses - $59.99</p>
           <a href="#contact" class="mt-4 inline-block btn-green">Shop Now</a>
         </div>
-        <div class="card text-gray-900 neumorphic">
+        <div class="card text-gray-900 neumorphic" title="This is a 3D model of an eco straw set.">
           <h3 class="text-2xl font-semibold">Eco Straw Set</h3>
           <div id="3d-straw" class="three-canvas"></div>
           <p class="mt-3">Reusable stainless steel straws - $14.99</p>
@@ -396,6 +440,7 @@
           <button onclick="changeTutorialColor()" class="btn-primary">Change Color</button>
           <button onclick="resetTutorialView()" class="btn-primary">Reset View</button>
           <input id="rotation-speed" type="range" min="0" max="0.05" step="0.001" value="0.01" class="w-32">
+          <input id="color-picker" type="color" value="#60a5fa" class="w-10 h-10">
         </div>
       </div>
     </section>
@@ -409,7 +454,6 @@
         <button onclick="generateAvatar()" class="mt-4 btn-primary">Generate Avatar</button>
         <div id="avatar-container" class="three-canvas mt-4"></div>
         <p id="avatar-message" class="mt-4 text-center form-message"></p>
-        <img id="avatar-placeholder" src="https://via.placeholder.com/400x300?text=AI+Avatar" alt="AI-generated avatar" class="mt-4 rounded-lg hidden max-w-full">
       </div>
     </section>
 
@@ -428,7 +472,6 @@
         <button onclick="convertImageTo3D()" class="mt-4 btn-primary">Convert to 3D</button>
         <div id="3d-image-container" class="three-canvas mt-4"></div>
         <p id="image-3d-message" class="mt-4 text-center form-message"></p>
-        <img id="image-placeholder" src="https://via.placeholder.com/400x300?text=Uploaded+Image" alt="Uploaded image" class="mt-4 rounded-lg hidden max-w-full">
       </div>
     </section>
 
@@ -443,20 +486,22 @@
       </div>
     </section>
   </main>
+
   <footer class="py-8 bg-gray-800 text-center">
     <p class="text-lg">© 2025 AI EcoLearn. All rights reserved.</p>
     <p class="mt-2 text-sm">Inspired by cutting-edge design and AI innovation.</p>
   </footer>
+
   <script>
     // Navigation
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
     hamburger.addEventListener('click', () => {
       navLinks.classList.toggle('active');
-      hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+      hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
     });
     navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', (e) => {
+      link.addEventListener('click', () => {
         navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
         link.classList.add('active');
         navLinks.classList.remove('active');
@@ -467,29 +512,45 @@
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         navLinks.classList.toggle('active');
-        hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+        hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
       }
     });
 
     // Course Enrollment
+    let currentCourse = '';
     function enrollCourse(course) {
+      currentCourse = course;
+      const modal = document.getElementById('enrollment-modal');
+      const courseName = document.getElementById('course-name');
+      courseName.textContent = course;
+      modal.style.display = 'flex';
+    }
+    function confirmEnrollment() {
       const message = document.getElementById('course-message');
-      message.textContent = `Successfully enrolled in ${course}!`;
+      message.textContent = `Successfully enrolled in ${currentCourse}!`;
       message.style.color = '#10b981';
       setTimeout(() => message.textContent = '', 3000);
+      closeModal();
+    }
+    function closeModal() {
+      const modal = document.getElementById('enrollment-modal');
+      modal.style.display = 'none';
     }
 
     // Community Feed
     let posts = [
-      { text: 'Welcome to AI EcoLearn!', comments: ['Excited to join!', 'Great platform!'] },
-      { text: 'Just enrolled in the AI course!', comments: ['Awesome choice!', 'How’s it going?'] },
-      { text: 'Loving the eco-friendly products!', comments: ['The notebook is amazing!'] }
+      { text: 'Welcome to AI EcoLearn!', comments: ['Excited to join!', 'Great platform!'], timestamp: new Date().toLocaleString(), likes: 0 },
+      { text: 'Just enrolled in the AI course!', comments: ['Awesome choice!', 'How’s it going?'], timestamp: new Date().toLocaleString(), likes: 0 },
+      { text: 'Loving the eco-friendly products!', comments: ['The notebook is amazing!'], timestamp: new Date().toLocaleString(), likes: 0 }
     ];
     function renderPosts() {
       const feed = document.getElementById('community-feed');
       feed.innerHTML = posts.map((post, idx) => `
         <div class="card text-gray-900 neumorphic mb-6">
           <p class="text-lg">${post.text}</p>
+          <p class="text-sm text-gray-600 mt-2">${post.timestamp}</p>
+          <p class="text-sm text-gray-600 mt-2">Likes: ${post.likes}</p>
+          <button onclick="likePost(${idx})" class="mt-2 btn-primary">Like</button>
           <p class="text-sm text-gray-600 mt-2">${post.comments.join(', ')}</p>
           <input id="comment-${idx}" type="text" placeholder="Add a comment..." class="form-input mt-3">
           <button onclick="addComment(${idx})" class="mt-2 btn-primary">Comment</button>
@@ -499,7 +560,7 @@
     function addPost() {
       const input = document.getElementById('post-input');
       if (input.value) {
-        posts.push({ text: input.value, comments: [] });
+        posts.push({ text: input.value, comments: [], timestamp: new Date().toLocaleString(), likes: 0 });
         input.value = '';
         renderPosts();
       }
@@ -512,40 +573,49 @@
         renderPosts();
       }
     }
+    function likePost(idx) {
+      posts[idx].likes++;
+      renderPosts();
+    }
     renderPosts();
 
     // Session Booking
     function bookSession() {
-      const date = document.getElementById('session-date').value;
+      const dateInput = document.getElementById('session-date');
+      const time = document.getElementById('session-time').value;
       const type = document.getElementById('session-type').value;
       const message = document.getElementById('session-message');
-      if (!date) {
-        message.textContent = 'Please select a date.';
+      const selectedDate = new Date(dateInput.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (!dateInput.value || selectedDate < today) {
+        message.textContent = 'Please select a future date.';
         message.style.color = '#ef4444';
         return;
       }
-      message.textContent = `Session booked for ${date} (${type})!`;
+      message.textContent = `Session booked for ${dateInput.value} at ${time} (${type})!`;
       message.style.color = '#10b981';
       setTimeout(() => message.textContent = '', 3000);
     }
 
     // Newsletter Signup
     function subscribeNewsletter() {
-      const email = document.getElementById('newsletter-email').value;
+      const emailInput = document.getElementById('newsletter-email');
       const message = document.getElementById('newsletter-message');
-      if (!email || !email.includes('@')) {
-        message.textContent = 'Please enter a valid email.';
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailInput.value || !emailRegex.test(emailInput.value)) {
+        message.textContent = 'Please enter a valid email address.';
         message.style.color = '#ef4444';
         return;
       }
-      message.textContent = 'Subscribed successfully!';
+      message.textContent = 'Subscribed successfully! Check your email for confirmation.';
       message.style.color = '#10b981';
-      document.getElementById('newsletter-email').value = '';
-      setTimeout(() => message.textContent = '', 3000);
+      emailInput.value = '';
+      setTimeout(() => message.textContent = '', 5000);
     }
 
     // 3D Visualization Setup
-    function create3DScene(containerId, geometryType, color, controlsEnabled = true) {
+    function create3DScene(containerId, geometryType, color) {
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 300, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -563,8 +633,6 @@
         case 'dodecahedron': geometry = new THREE.DodecahedronGeometry(1); break;
         case 'octahedron': geometry = new THREE.OctahedronGeometry(1); break;
         case 'tetrahedron': geometry = new THREE.TetrahedronGeometry(1); break;
-        case 'avatar': geometry = new THREE.SphereGeometry(1, 32, 32); break;
-        case 'image3d': geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); break;
       }
       const material = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2 });
       const mesh = new THREE.Mesh(geometry, material);
@@ -576,24 +644,16 @@
       scene.add(light2);
       camera.position.z = 5;
 
-      let controls;
-      if (controlsEnabled) {
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enableZoom = true;
-        controls.minDistance = 2;
-        controls.maxDistance = 10;
-      }
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enableZoom = true;
+      controls.minDistance = 2;
+      controls.maxDistance = 10;
 
-      let rotationSpeed = 0.01;
       function animate() {
         requestAnimationFrame(animate);
-        if (!controlsEnabled) {
-          mesh.rotation.x += rotationSpeed;
-          mesh.rotation.y += rotationSpeed;
-        }
-        controls?.update();
+        controls.update();
         renderer.render(scene, camera);
       }
       animate();
@@ -605,58 +665,74 @@
         camera.updateProjectionMatrix();
       });
 
-      return { mesh, camera, material, setRotationSpeed: (speed) => rotationSpeed = speed };
+      return { mesh, camera, material };
     }
 
-    // Initialize 3D Models
-    const scenes = {
-      notebook: create3DScene('3d-notebook', 'torusKnot', 0x10b981),
-      bottle: create3DScene('3d-bottle', 'cylinder', 0x3b82f6),
-      pen: create3DScene('3d-pen', 'sphere', 0x8b5cf6),
-      bag: create3DScene('3d-bag', 'box', 0x10b981),
-      tote: create3DScene('3d-tote', 'cone', 0x3b82f6),
-      charger: create3DScene('3d-charger', 'dodecahedron', 0x8b5cf6),
-      sunglasses: create3DScene('3d-sunglasses', 'octahedron', 0x10b981),
-      straw: create3DScene('3d-straw', 'tetrahedron', 0x3b82f6),
-      tutorial: create3DScene('3d-tutorial', 'torusKnot', 0x60a5fa)
-    };
+    // Lazy Load 3D Models with Intersection Observer
+    const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          if (id === 'products' && !scenes.notebook) {
+            scenes.notebook = create3DScene('3d-notebook', 'torusKnot', 0x10b981);
+            scenes.bottle = create3DScene('3d-bottle', 'cylinder', 0x3b82f6);
+            scenes.pen = create3DScene('3d-pen', 'sphere', 0x8b5cf6);
+            scenes.bag = create3DScene('3d-bag', 'box', 0x10b981);
+            scenes.tote = create3DScene('3d-tote', 'cone', 0x3b82f6);
+            scenes.charger = create3DScene('3d-charger', 'dodecahedron', 0x8b5cf6);
+            scenes.sunglasses = create3DScene('3d-sunglasses', 'octahedron', 0x10b981);
+            scenes.straw = create3DScene('3d-straw', 'tetrahedron', 0x3b82f6);
+            scenes.tutorial = create3DScene('3d-tutorial', 'torusKnot', 0x60a5fa);
+          }
+        }
+      });
+    }, observerOptions);
+    document.querySelectorAll('.section').forEach(section => observer.observe(section));
+
+    const scenes = {};
 
     // 3D Tutorial Controls
     function changeTutorialColor() {
-      const colors = [0x60a5fa, 0x10b981, 0x8b5cf6, 0xf43f5e];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      scenes.tutorial.material.color.set(randomColor);
+      if (scenes.tutorial) {
+        const colorPicker = document.getElementById('color-picker');
+        scenes.tutorial.material.color.set(colorPicker.value);
+      }
     }
     function resetTutorialView() {
-      scenes.tutorial.mesh.rotation.set(0, 0, 0);
-      scenes.tutorial.camera.position.set(0, 0, 5);
-      scenes.tutorial.material.color.set(0x60a5fa);
+      if (scenes.tutorial) {
+        scenes.tutorial.mesh.rotation.set(0, 0, 0);
+        scenes.tutorial.camera.position.set(0, 0, 5);
+        scenes.tutorial.material.color.set(0x60a5fa);
+      }
     }
-    document.getElementById('rotation-speed').addEventListener('input', (e) => {
-      scenes.tutorial.setRotationSpeed(parseFloat(e.target.value));
+    document.getElementById('rotation-speed')?.addEventListener('input', (e) => {
+      if (scenes.tutorial) {
+        const speed = parseFloat(e.target.value);
+        scenes.tutorial.mesh.rotation.x += speed;
+        scenes.tutorial.mesh.rotation.y += speed;
+      }
     });
 
     // AI Avatar Generator
     function generateAvatar() {
-      const prompt = document.getElementById('avatar-prompt').value;
+      const prompt = document.getElementById('avatar-prompt').value.toLowerCase();
       const message = document.getElementById('avatar-message');
       const container = document.getElementById('avatar-container');
-      const placeholder = document.getElementById('avatar-placeholder');
       container.innerHTML = '';
       if (!prompt) {
         message.textContent = 'Please enter a description.';
         message.style.color = '#ef4444';
         return;
       }
+      let geometryType = 'sphere';
+      if (prompt.includes('cyborg')) geometryType = 'box';
+      else if (prompt.includes('alien')) geometryType = 'cone';
+      else if (prompt.includes('robot')) geometryType = 'cylinder';
+      create3DScene('avatar-container', geometryType, 0x8b5cf6);
       message.textContent = `Generated avatar: ${prompt}`;
       message.style.color = '#10b981';
-      placeholder.src = `https://via.placeholder.com/400x300?text=${encodeURIComponent(prompt)}`;
-      placeholder.classList.remove('hidden');
-      create3DScene('avatar-container', 'avatar', 0x8b5cf6);
-      setTimeout(() => {
-        message.textContent = '';
-        placeholder.classList.add('hidden');
-      }, 5000);
+      setTimeout(() => message.textContent = '', 5000);
     }
 
     // Image to 3D Model
@@ -665,26 +741,16 @@
       const geometry = document.getElementById('3d-geometry').value;
       const message = document.getElementById('image-3d-message');
       const container = document.getElementById('3d-image-container');
-      const placeholder = document.getElementById('image-placeholder');
       container.innerHTML = '';
       if (!input.files || !input.files[0]) {
         message.textContent = 'Please upload an image.';
         message.style.color = '#ef4444';
         return;
       }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        placeholder.src = e.target.result;
-        placeholder.classList.remove('hidden');
-        message.textContent = `Converted image to 3D ${geometry}!`;
-        message.style.color = '#10b981';
-        create3DScene('3d-image-container', geometry, 0x3b82f6);
-        setTimeout(() => {
-          message.textContent = '';
-          placeholder.classList.add('hidden');
-        }, 5000);
-      };
-      reader.readAsDataURL(input.files[0]);
+      create3DScene('3d-image-container', geometry, 0x3b82f6);
+      message.textContent = `Converted image to 3D ${geometry}!`;
+      message.style.color = '#10b981';
+      setTimeout(() => message.textContent = '', 5000);
       input.value = '';
     }
   </script>
