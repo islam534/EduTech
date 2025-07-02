@@ -19,13 +19,19 @@
       overflow-x: hidden;
     }
     .sticky-header {
-      position: sticky;
+      position: fixed;
       top: 0;
+      width: 100%;
       z-index: 1000;
       background: rgba(17, 24, 39, 0.85);
       backdrop-filter: blur(12px);
       padding: 1rem 2rem;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: transform 0.4s ease, opacity 0.4s ease; /* Smoother transition */
+    }
+    .sticky-header.hidden {
+      transform: translateY(-100%);
+      opacity: 0; /* Fade out for a nicer effect */
     }
     .nav-links a {
       color: #fff;
@@ -113,7 +119,7 @@
     }
     @media (max-width: 768px) {
       .nav-links {
-        display: none; /* Hide nav-links by default on small screens */
+        display: none;
         flex-direction: column;
         position: absolute;
         top: 70px;
@@ -122,9 +128,16 @@
         background: #111827;
         padding: 1.5rem;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth menu transition */
       }
       .nav-links.active {
-        display: flex; /* Show nav-links when active */
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .nav-links:not(.active) {
+        opacity: 0;
+        transform: translateY(-10px); /* Subtle slide for mobile menu */
       }
       .nav-links a {
         padding: 1rem;
@@ -132,13 +145,16 @@
         text-align: center;
       }
       .hamburger {
-        display: block; /* Show hamburger on small screens */
+        display: block;
       }
       .three-canvas {
         height: 200px;
       }
       .section {
         padding: 3rem 1rem;
+      }
+      body {
+        padding-top: 70px; /* Prevent content from hiding under header */
       }
     }
     @keyframes slide-in {
@@ -172,7 +188,6 @@
       box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
       border-radius: 12px;
     }
-    /* Modal Styles */
     .modal {
       display: none;
       position: fixed;
@@ -510,25 +525,58 @@
     // Navigation
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
-    
-    // Initialize hamburger menu state
+    const header = document.querySelector('.sticky-header');
+    let lastScrollY = window.scrollY;
+    let isMobile = window.innerWidth <= 768;
+
+    // Initialize navigation state
     function initializeNav() {
-      if (window.innerWidth <= 768) {
+      isMobile = window.innerWidth <= 768;
+      if (isMobile) {
         navLinks.classList.remove('active');
         hamburger.setAttribute('aria-expanded', 'false');
       } else {
-        navLinks.classList.remove('active'); // Ensure nav-links are visible on larger screens
+        navLinks.classList.remove('active');
+        header.classList.remove('hidden'); // Ensure header is visible on desktop
       }
     }
 
-    // Run on page load
+    // Debounce function to optimize scroll performance
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Hide header on scroll down, show on scroll up (mobile only)
+    function handleScroll() {
+      if (!isMobile) return; // Skip on larger screens
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        header.classList.add('hidden');
+        navLinks.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+      } else if (currentScrollY < lastScrollY) {
+        header.classList.remove('hidden');
+      }
+      lastScrollY = currentScrollY;
+    }
+
+    // Run on page load, resize, and debounced scroll
     window.addEventListener('load', initializeNav);
-    // Run on window resize
     window.addEventListener('resize', initializeNav);
+    window.addEventListener('scroll', debounce(handleScroll, 10));
 
     hamburger.addEventListener('click', () => {
       navLinks.classList.toggle('active');
       hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
+      header.classList.remove('hidden'); // Show header when hamburger is clicked
     });
 
     navLinks.querySelectorAll('a').forEach(link => {
@@ -537,6 +585,7 @@
         link.classList.add('active');
         navLinks.classList.remove('active');
         hamburger.setAttribute('aria-expanded', 'false');
+        if (isMobile) header.classList.remove('hidden'); // Ensure header stays visible after link click
       });
     });
 
@@ -545,6 +594,7 @@
         e.preventDefault();
         navLinks.classList.toggle('active');
         hamburger.setAttribute('aria-expanded', navLinks.classList.contains('active') ? 'true' : 'false');
+        header.classList.remove('hidden');
       }
     });
 
@@ -556,6 +606,7 @@
       const courseName = document.getElementById('course-name');
       courseName.textContent = course;
       modal.style.display = 'flex';
+      header.classList.remove('hidden'); // Show header when modal opens
     }
     function confirmEnrollment() {
       const message = document.getElementById('course-message');
